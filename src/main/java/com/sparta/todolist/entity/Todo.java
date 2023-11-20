@@ -1,52 +1,57 @@
-package com.example.todo.entity;
+package com.sparta.todolist.entity;
 
-import com.example.todo.dto.TodoRequestDto;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
+import com.sparta.todolist.dto.TodoTitleContentRequestDto;
+import com.sparta.todolist.dto.TodoRequestDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity // JPA가 관리할 수 있는 Entity 클래스 지정
 @Getter
 @Setter
 @Table(name = "todo") // 매핑할 테이블의 이름을 지정
 @NoArgsConstructor
-public class Todo extends Timestamped{
+public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "title", nullable = false, length = 30)
+    private Long todoid;
+
+    @Column(nullable = false)
     private String title;
-    @Column(name = "contents", nullable = false, length = 500)
-    private String contents;
-    @Column(name = "status")
-    private Boolean status = false;
+
+    @Column(nullable = false)
+    private String content;
+
+    @Column(nullable = false)
+    private String maker;
+
+    @Column(nullable = false)
+    private String date;
+
+    @Column(nullable = false)
+    private boolean finish;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "todo", cascade = CascadeType.ALL)
-    private List<Comment> comments = new ArrayList<>();
-
-
-    public Todo(User user, TodoRequestDto requestDto) {
+    public Todo(TodoRequestDto requestDto, User user) {
+        this.title = requestDto.getTitle();
+        this.content = requestDto.getContent();
+        this.maker = requestDto.getMaker();
+        this.date = LocalDateTime.now().toString();
+        this.finish = false;
         this.user = user;
-        this.title = requestDto.getTitle();
-        this.contents = requestDto.getContents();
     }
 
-    public void update(TodoRequestDto requestDto) {
+    public void update(TodoTitleContentRequestDto requestDto) {
         this.title = requestDto.getTitle();
-        this.contents = requestDto.getContents();
+        this.content = requestDto.getContent();
     }
 
-    public void complete() {
-        this.status = true;
-    }
+
 }

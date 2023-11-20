@@ -1,6 +1,6 @@
-package com.todoproject.todoproject.security;
+package com.sparta.todolist.security;
 
-import com.todoproject.todoproject.jwt.JwtUtil;
+import com.sparta.todolist.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

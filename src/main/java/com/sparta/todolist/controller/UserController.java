@@ -1,14 +1,21 @@
 package com.sparta.todolist.controller;
 
-import com.sparta.todolist.dto.LoginRequestDto;
+
 import com.sparta.todolist.dto.SignupRequestDto;
 import com.sparta.todolist.service.UserService;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+@Slf4j
 @Controller
 @RequestMapping("/api")
 public class UserController {
@@ -19,31 +26,19 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/user/login-page")
-    public String loginPage() {
-        return "login";
-    }
-
-    @GetMapping("/user/signup")
-    public String signupPage() {
-        return "signup";
-    }
-
     @PostMapping("/user/signup")
-    public  String signup(SignupRequestDto requestDto){
-        userService.signup(requestDto);
-
-        return "redirect:/api/user/login-page";
-    }
-
-    @PostMapping("/user/login")
-    public String login(LoginRequestDto requestDto, HttpServletResponse res){
-        try {
-            userService.login(requestDto, res);
-        } catch (Exception e) {
-            return "redirect:/api/user/login-page?error";
+    public ResponseEntity<String> signup(@Valid @RequestBody SignupRequestDto requestDto, BindingResult bindingResult) {
+        // Validation 예외처리
+        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+        if(fieldErrors.size() > 0) {
+            for (FieldError fieldError : bindingResult.getFieldErrors()) {
+                log.error(fieldError.getField() + " 필드 : " + fieldError.getDefaultMessage());
+            }
+            return new ResponseEntity<>("회원가입 실패", HttpStatusCode.valueOf(400));
         }
 
-        return "redirect:/";
+        userService.signup(requestDto);
+
+        return new ResponseEntity<>("회원가입 성공", HttpStatus.CREATED);
     }
 }

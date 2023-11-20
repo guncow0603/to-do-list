@@ -1,6 +1,6 @@
-package com.todoproject.todoproject.dto.todo;
+package com.sparta.todolist.dto;
 
-import com.todoproject.todoproject.entity.Todo;
+import com.sparta.todolist.entity.Todo;
 
 public class TodosResponseDto {
     //private Long todoid;
@@ -12,9 +12,7 @@ public class TodosResponseDto {
 
 
     public TodosResponseDto(Todo todo) {
-        //this.todoid = todo.getTodoid();
         this.title = todo.getTitle();
-        //this.content = todo.getContent();
         this.maker = todo.getMaker();
         this.date = todo.getDate();
         this.finish = todo.isFinish();

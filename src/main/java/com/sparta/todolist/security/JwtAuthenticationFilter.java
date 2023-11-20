@@ -1,8 +1,8 @@
-package com.todoproject.todoproject.security;
+package com.sparta.todolist.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.todoproject.todoproject.dto.LoginRequestDto;
-import com.todoproject.todoproject.jwt.JwtUtil;
+import com.sparta.todolist.dto.LoginRequestDto;
+import com.sparta.todolist.jwt.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

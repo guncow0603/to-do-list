@@ -1,4 +1,4 @@
-package com.example.todo.dto;
+package com.sparta.todolist.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Getter;

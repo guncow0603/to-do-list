@@ -1,4 +1,4 @@
-package com.todoproject.todoproject.dto.todo;
+package com.sparta.todolist.dto;
 
 import lombok.Getter;
 import lombok.Setter;

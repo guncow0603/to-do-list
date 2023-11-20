@@ -1,28 +1,25 @@
-package com.example.todo.dto;
+package com.sparta.todolist.dto;
 
-import com.example.todo.entity.Todo;
-import com.example.todo.entity.User;
+
+import com.sparta.todolist.entity.Todo;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class TodoResponseDto {
-    private Long id;
-    private Long user_id;
+    //private Long todoid;
     private String title;
-    private String contents;
-    private Boolean status;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
+    //private String content;
+    private String maker;
+    private String date;
+    private boolean finish;
+
 
     public TodoResponseDto(Todo todo) {
-        this.id = todo.getId();
-        this.user_id = todo.getUser().getId();
         this.title = todo.getTitle();
-        this.contents = todo.getContents();
-        this.status = todo.getStatus();
-        this.createdAt = todo.getCreatedAt();
-        this.modifiedAt = todo.getModifiedAt();
+        this.maker = todo.getMaker();
+        this.date = todo.getDate();
+        this.finish = todo.isFinish();
     }
 }

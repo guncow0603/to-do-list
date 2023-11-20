@@ -1,165 +1,58 @@
-package com.example.todo.service;
+package com.sparta.todolist.service;
 
 
-import com.example.todo.dto.CommentRequestDto;
-import com.example.todo.dto.CommentResponseDto;
-import com.example.todo.dto.TodoRequestDto;
-import com.example.todo.dto.TodoResponseDto;
-import com.example.todo.entity.Comment;
-import com.example.todo.entity.ErrorCode;
-import com.example.todo.entity.Todo;
-import com.example.todo.entity.User;
-import com.example.todo.exception.CustomException;
-import com.example.todo.repository.CommentRepository;
-import com.example.todo.repository.TodoRepository;
+import com.sparta.todolist.dto.TodoRequestDto;
+import com.sparta.todolist.dto.TodoResponseDto;
+import com.sparta.todolist.dto.TodoTitleContentRequestDto;
+import com.sparta.todolist.entity.Todo;
+import com.sparta.todolist.entity.User;
+import com.sparta.todolist.repository.TodoRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TodoService {
-
     private final TodoRepository todoRepository;
-    private final CommentRepository commentRepository;
 
-    public TodoService(TodoRepository todoRepository, CommentRepository commentRepository) {
-        this.todoRepository = todoRepository;
-        this.commentRepository = commentRepository;
+    public TodoResponseDto createTodo(TodoRequestDto requestDto, User user) {
+        Todo todo = todoRepository.save(new Todo(requestDto, user));
+        return new TodoResponseDto(todo);
     }
 
     @Transactional
-    public TodoResponseDto createTodo(User user, TodoRequestDto requestDto) {
-        // RequestDto -> Entity
-        Todo todo = new Todo(user, requestDto);
+    public TodoResponseDto updateTodo(Long id, TodoTitleContentRequestDto requestDto) {
+        Todo todo = todoRepository.findBytodoid(id).orElseThrow(() ->
+                new NullPointerException("해당 게시글을 찾을 수 없습니다.")
+        );
 
-        // DB 저장
-        Todo saveTodo = todoRepository.save(todo);
+        todo.update(requestDto);
 
-        // Entity -> ResponseDto
-        TodoResponseDto todoResponseDto = new TodoResponseDto(saveTodo);
-
-        return todoResponseDto;
+        return new TodoResponseDto(todo);
     }
 
-    @Transactional
-    public CommentResponseDto addComment(Long todo_id, User user, CommentRequestDto requestDto) {
-        Todo todo = findTodo(todo_id);
-        Comment comment = new Comment(user, todo, requestDto);
-        Comment saveComment = commentRepository.save(comment);
+    @Transactional(readOnly = true)
+    public List<TodoResponseDto> getTodos() {
+        List<Todo> todoList = todoRepository.findAllByOrderByDateDesc();
+        List<TodoResponseDto> responseDtoList = new ArrayList<>();
 
-        CommentResponseDto commentResponseDto = new CommentResponseDto(saveComment);
+        for (Todo todo : todoList) {
+            responseDtoList.add(new TodoResponseDto(todo));
+        }
 
-        return commentResponseDto;
+        return responseDtoList;
     }
 
-    @Transactional
-    public List<TodoResponseDto> getTodoList() {
-        // DB 조회
-        return todoRepository.findAllByOrderByModifiedAtDesc().stream().map(TodoResponseDto::new).toList();
-    }
-
-    @Transactional
+    @Transactional(readOnly = true)
     public TodoResponseDto getTodo(Long id) {
-        Todo todo = findTodo(id);
-        TodoResponseDto todoResponseDto = new TodoResponseDto(todo);
-        return todoResponseDto;
-    }
-
-    @Transactional
-    public List<CommentResponseDto> getComments(Long id) {
-        Todo todo = findTodo(id);
-
-        List<Comment> comments = todo.getComments();
-        List<CommentResponseDto> commentResponseDtos = comments.stream().map(CommentResponseDto::new).toList();
-
-        return commentResponseDtos;
-    }
-
-    @Transactional
-    public TodoResponseDto updateTodo(Long id, User user, TodoRequestDto requestDto) {
-        // 해당 메모가 DB에 존재하는지 확인
-        Todo todo = findTodo(id);
-        if (todo.getUser().getId()==user.getId()){
-            // todo 내용 수정
-            todo.update(requestDto);
-        }
-        else {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
-        }
-
-        TodoResponseDto todoResponseDto = new TodoResponseDto(todo);
-        return todoResponseDto;
-    }
-
-    @Transactional
-    public TodoResponseDto completeTodo(Long id, User user) {
-        // 해당 메모가 DB에 존재하는지 확인
-        Todo todo = findTodo(id);
-        if (todo.getUser().getId()==user.getId()){
-            // todo 내용 수정
-            todo.complete();
-        }
-        else {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
-        }
-
-        TodoResponseDto todoResponseDto = new TodoResponseDto(todo);
-        return todoResponseDto;
-    }
-
-    @Transactional
-    public CommentResponseDto updateComment(Long id, User user, CommentRequestDto requestDto) {
-        Comment comment = findComment(id);
-        if (comment.getUser().getId()==user.getId()) {
-            comment.update(requestDto);
-        } else {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
-        }
-
-        CommentResponseDto commentResponseDto = new CommentResponseDto(comment);
-
-        return commentResponseDto;
-    }
-
-    @Transactional
-    public Long deleteTodo(Long id, User user) {
-        // 해당 메모가 DB에 존재하는지 확인
-        Todo todo = findTodo(id);
-        if (todo.getUser().getId()==user.getId()){
-            // todo 삭제
-            todoRepository.delete(todo);
-        } else {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
-        }
-
-        return id;
-    }
-
-    @Transactional
-    public Long deleteComment(Long id, User user) {
-        Comment comment = findComment(id);
-        if (comment.getUser().getId()==user.getId()) {
-            commentRepository.delete(comment);
-        } else {
-            throw new CustomException(ErrorCode.ACCESS_DENIED);
-        }
-        return id;
-    }
-
-    @Transactional
-    private Todo findTodo(Long id) {
-        return todoRepository.findById(id).orElseThrow(() -> {
-                    throw new CustomException(ErrorCode.INDEX_NOT_FOUND);
-                }
+        Todo todo = todoRepository.findBytodoid(id).orElseThrow(() ->
+                new NullPointerException("해당 게시글을 찾을 수 없습니다.")
         );
-    }
 
-    @Transactional
-    private Comment findComment(Long id) {
-        return commentRepository.findById(id).orElseThrow(() -> {
-                    throw new CustomException(ErrorCode.INDEX_NOT_FOUND);
-                }
-        );
+        return new TodoResponseDto(todo);
     }
 }
